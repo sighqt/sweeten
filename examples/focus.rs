@@ -1,21 +1,17 @@
 use iced::advanced::widget;
-use iced::widget::{button, center, column, container, row, text};
+use iced::widget::{center, column, container, row, text};
 use iced::{Center, Element, Fill, Subscription, Task};
 
-use sweeten::widget::text_input;
+use sweeten::widget::{button, text_input};
 
 fn main() -> iced::Result {
-    iced::application(
-        "sweeten • iced text_input example",
-        App::update,
-        App::view,
-    )
-    .window(iced::window::Settings {
-        min_size: Some([600.0, 400.0].into()),
-        ..iced::window::Settings::default()
-    })
-    .subscription(App::subscription)
-    .run_with(App::new)
+    iced::application("sweeten • focus management", App::update, App::view)
+        .window(iced::window::Settings {
+            min_size: Some([600.0, 400.0].into()),
+            ..iced::window::Settings::default()
+        })
+        .subscription(App::subscription)
+        .run_with(App::new)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -224,7 +220,7 @@ impl App {
             let input_widget = text_input(field.placeholder(), value)
                 .id(field.id())
                 .on_input(move |text| Message::InputChanged(field, text))
-                .on_focus(move |_| Message::InputFocused(field))
+                .on_focus(Message::InputFocused(field))
                 .on_blur(Message::InputBlurred(field))
                 .width(Fill)
                 .secure(field == Field::Password);
@@ -254,7 +250,7 @@ impl App {
         };
 
         let submit_button = button(text("Submit").center())
-            .on_press_maybe(self.form_is_valid().then(|| Message::SubmitForm))
+            .on_press_maybe(self.form_is_valid().then_some(Message::SubmitForm))
             .width(120);
 
         let form_status_content = if self.username.error().is_some()

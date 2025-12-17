@@ -17,7 +17,7 @@
 //! #[derive(Clone)]
 //! enum Message {
 //!     ContentChanged(String),
-//!     Focused(String),
+//!     Focused,
 //!     Blurred,
 //! }
 //!
@@ -99,7 +99,7 @@ pub struct TextInput<
     size: Option<Pixels>,
     line_height: text::LineHeight,
     alignment: alignment::Horizontal,
-    on_focus: Option<Box<dyn Fn(String) -> Message + 'a>>,
+    on_focus: Option<Message>,
     on_blur: Option<Message>,
     on_input: Option<Box<dyn Fn(String) -> Message + 'a>>,
     on_paste: Option<Box<dyn Fn(String) -> Message + 'a>>,
@@ -155,11 +155,8 @@ where
 
     /// Sets the message that should be produced when the [`TextInput`] is
     /// focused.
-    pub fn on_focus(
-        mut self,
-        on_focus: impl Fn(String) -> Message + 'a,
-    ) -> Self {
-        self.on_focus = Some(Box::new(on_focus));
+    pub fn on_focus(mut self, on_focus: Message) -> Self {
+        self.on_focus = Some(on_focus);
         self
     }
 
@@ -666,6 +663,22 @@ where
             );
         };
 
+        // Detect focus changes from operations (e.g., Tab key)
+        {
+            let state = state::<Renderer>(tree);
+            let is_focused = state.is_focused.is_some();
+            if is_focused != state.was_focused {
+                if is_focused {
+                    if let Some(on_focus) = &self.on_focus {
+                        shell.publish(on_focus.clone());
+                    }
+                } else if let Some(on_blur) = &self.on_blur {
+                    shell.publish(on_blur.clone());
+                }
+                state.was_focused = is_focused;
+            }
+        }
+
         match event {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
             | Event::Touch(touch::Event::FingerPressed { .. }) => {
@@ -678,8 +691,7 @@ where
                         let now = Instant::now();
 
                         if let Some(on_focus) = &self.on_focus {
-                            let message = (on_focus)(format!("{}", self.value));
-                            shell.publish(message);
+                            shell.publish(on_focus.clone());
                         }
 
                         Some(Focus {
@@ -1329,31 +1341,8 @@ where
     widget::operate(widget::operation::focusable::focus(id.0))
 }
 
-/// Produces a [`Task`] that focuses the next focusable widget
-/// and then applies the provided function to create a resulting task.
-pub fn focus_next<T, F>(f: F) -> Task<T>
-where
-    T: Send + 'static,
-    F: Send + Sync + Fn(widget::Id) -> Task<T> + 'static,
-{
-    widget::operate(widget::operation::focusable::focus_next()).chain(
-        widget::operate(widget::operation::focusable::find_focused())
-            .then(f),
-    )
-}
-
-/// Produces a [`Task`] that focuses the previous focusable widget
-/// and then applies the provided function to create a resulting task.
-pub fn focus_previous<T, F>(f: F) -> Task<T>
-where
-    T: Send + 'static,
-    F: Send + Sync + Fn(widget::Id) -> Task<T> + 'static,
-{
-    widget::operate(widget::operation::focusable::focus_previous()).chain(
-        widget::operate(widget::operation::focusable::find_focused())
-            .then(f),
-    )
-}
+// Re-export focus operations from the operation module for backwards compatibility
+pub use super::operation::{focus_next, focus_previous};
 
 /// Produces a [`Task`] that moves the cursor of the [`TextInput`] with the given [`Id`] to the
 /// end.
@@ -1407,6 +1396,7 @@ pub struct State<P: text::Paragraph> {
     placeholder: paragraph::Plain<P>,
     icon: paragraph::Plain<P>,
     is_focused: Option<Focus>,
+    was_focused: bool,
     is_dragging: bool,
     is_pasting: Option<Value>,
     last_click: Option<mouse::Click>,

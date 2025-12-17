@@ -120,8 +120,11 @@ impl Value {
     /// dot ('•') character.
     pub fn secure(&self) -> Self {
         Self {
-            graphemes: std::iter::repeat_n(String::from("•"), self.graphemes.len())
-                .collect(),
+            graphemes: std::iter::repeat_n(
+                String::from("•"),
+                self.graphemes.len(),
+            )
+            .collect(),
         }
     }
 }

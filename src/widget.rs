@@ -10,10 +10,30 @@ use iced::advanced::text;
 use iced::Element;
 use std::borrow::Borrow;
 
+pub mod button;
 pub mod mouse_area;
+pub mod operation;
 pub mod overlay;
 pub mod pick_list;
 pub mod text_input;
+
+/// Creates a new [`button::Button`] with the given content.
+///
+/// This is a sweetened version of `iced`'s [`Button`] with support for
+/// [`on_focus`] and [`on_blur`] messages, making it focusable.
+///
+/// [`Button`]: https://docs.rs/iced/latest/iced/widget/struct.Button.html
+/// [`on_focus`]: button::Button::on_focus
+/// [`on_blur`]: button::Button::on_blur
+pub fn button<'a, Message, Theme, Renderer>(
+    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+) -> button::Button<'a, Message, Theme, Renderer>
+where
+    Renderer: iced::advanced::renderer::Renderer,
+    Theme: button::Catalog,
+{
+    button::Button::new(content)
+}
 
 /// Creates a new [`mouse_area::MouseArea`] for capturing mouse events.
 ///
