@@ -14,7 +14,7 @@ use iced::widget::{
 };
 use iced::{Center, Element, Fill, Subscription, Task};
 
-use sweeten::text_input;
+use sweeten::focusable_text_input as text_input;
 
 fn main() -> iced::Result {
     iced::application(App::new, App::update, App::view)

@@ -67,7 +67,7 @@ where
 /// [`iced`'s `text_input`]: https://docs.iced.rs/iced/widget/text_input/index.html
 /// [`on_focus`]: TextInput::on_focus
 /// [`on_blur`]: TextInput::on_blur
-pub fn text_input<'a, Message, Theme, Renderer>(
+pub fn focusable_text_input<'a, Message, Theme, Renderer>(
     placeholder: &str,
     value: &str,
 ) -> TextInput<'a, Message, Theme, Renderer>
@@ -116,4 +116,20 @@ where
     Renderer: core::Renderer,
 {
     MouseArea::new(widget)
+}
+
+/// Creates a new [`Button`] within the given context.
+///
+/// This is a sweetened version of [`iced`'s `Button`] with support for [`on_focus`]
+/// and [`on_blur`] messages, making it focusable.
+///
+/// [`iced`'s `Button`]: https://docs.iced.rs/iced/widget/button/struct.Button.html
+pub fn focusable_button<'a, Message, Theme, Renderer>(
+    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+) -> crate::widget::button::Button<'a, Message, Theme, Renderer>
+where
+    Renderer: core::Renderer,
+    Theme: crate::widget::button::Catalog,
+{
+    crate::widget::button::Button::new(content)
 }

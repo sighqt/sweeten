@@ -71,7 +71,6 @@ use crate::core::{
     Padding, Pixels, Point, Rectangle, Shell, Size, Theme, Vector, Widget,
 };
 use crate::overlay::menu::{self, Menu};
-
 use std::borrow::Borrow;
 use std::f32;
 
@@ -199,7 +198,7 @@ where
             placeholder: None,
             selected,
             width: Length::Shrink,
-            padding: crate::button::DEFAULT_PADDING,
+            padding: crate::widget::button::DEFAULT_PADDING,
             text_size: None,
             text_line_height: text::LineHeight::default(),
             text_shaping: text::Shaping::default(),
