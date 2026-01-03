@@ -66,6 +66,15 @@
 //! [`on_focus`]: widget::text_input::TextInput::on_focus
 //! [`on_blur`]: widget::text_input::TextInput::on_blur
 
+/// Convenient imports for Sweeten's enhanced widgets.
+///
+/// Importing this prelude lets you use [`button(...)`] / [`text_input(...)`]
+/// without colliding with the crate's `widget::*` modules.
+pub mod prelude {
+    pub use crate::focusable_button as button;
+    pub use crate::focusable_text_input as text_input;
+}
+
 mod helpers;
 pub mod widget;
 

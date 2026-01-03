@@ -27,9 +27,9 @@ enum Message {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Target {
-    IncrementButton,
-    DecrementButton,
-    ResetButton,
+    Increment,
+    Decrement,
+    Reset,
 }
 
 struct App {
@@ -45,7 +45,7 @@ impl Default for App {
             focused: false,
             count: 0,
             last_event: "none",
-            focused_target: Target::IncrementButton,
+            focused_target: Target::Increment,
         }
     }
 }
@@ -61,20 +61,20 @@ impl App {
         let reset = focusable_button(text("Reset"))
             .id(reset_id())
             .on_press(Message::Reset)
-            .on_focus(Message::Focus(Target::ResetButton))
-            .on_blur(Message::Blur(Target::ResetButton));
+            .on_focus(Message::Focus(Target::Reset))
+            .on_blur(Message::Blur(Target::Reset));
 
         let increment = focusable_button(text("+ 1"))
             .id(inc_id())
             .on_press(Message::Incremented)
-            .on_focus(Message::Focus(Target::IncrementButton))
-            .on_blur(Message::Blur(Target::IncrementButton));
+            .on_focus(Message::Focus(Target::Increment))
+            .on_blur(Message::Blur(Target::Increment));
 
         let decrement = focusable_button(text("- 1"))
             .id(dec_id())
             .on_press(Message::Decremented)
-            .on_focus(Message::Focus(Target::DecrementButton))
-            .on_blur(Message::Blur(Target::DecrementButton));
+            .on_focus(Message::Focus(Target::Decrement))
+            .on_blur(Message::Blur(Target::Decrement));
 
         container(
             column![
@@ -164,20 +164,20 @@ fn reset_id() -> Id {
 
 fn next_target(current: Target, shift: bool) -> Target {
     match (current, shift) {
-        (Target::IncrementButton, false) => Target::DecrementButton,
-        (Target::DecrementButton, false) => Target::ResetButton,
-        (Target::ResetButton, false) => Target::IncrementButton,
+        (Target::Increment, false) => Target::Decrement,
+        (Target::Decrement, false) => Target::Reset,
+        (Target::Reset, false) => Target::Increment,
 
-        (Target::IncrementButton, true) => Target::ResetButton,
-        (Target::DecrementButton, true) => Target::IncrementButton,
-        (Target::ResetButton, true) => Target::DecrementButton,
+        (Target::Increment, true) => Target::Reset,
+        (Target::Decrement, true) => Target::Increment,
+        (Target::Reset, true) => Target::Decrement,
     }
 }
 
 fn target_id(target: Target) -> Id {
     match target {
-        Target::IncrementButton => inc_id(),
-        Target::DecrementButton => dec_id(),
-        Target::ResetButton => reset_id(),
+        Target::Increment => inc_id(),
+        Target::Decrement => dec_id(),
+        Target::Reset => reset_id(),
     }
 }
